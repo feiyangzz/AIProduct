@@ -1,0 +1,5 @@
+node: .env
+.env.*: .env.*
+node_modules
+dist
+*.local
