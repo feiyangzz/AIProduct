@@ -57,12 +57,12 @@ function getProjectCount(userId: number) {
 onMounted(async () => {
   loading.value = true
   try {
-    const [teamRes] = await Promise.all([
+    const [teamData] = await Promise.all([
       teamApi.getMembers(),
       projectStore.fetchProjects(),
       taskStore.fetchTasks(),
     ])
-    if (teamRes.code === 0) members.value = teamRes.data
+    members.value = teamData
   } finally {
     loading.value = false
   }

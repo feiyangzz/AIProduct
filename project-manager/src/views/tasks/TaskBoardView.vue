@@ -239,8 +239,8 @@ onMounted(async () => {
   await Promise.all([
     projectStore.fetchProjects(),
     taskStore.fetchTasks(),
-    teamApi.getMembers().then((res) => {
-      if (res.code === 0) members.value = res.data
+    teamApi.getMembers().then((data) => {
+      members.value = data
     }),
   ])
 })

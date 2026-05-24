@@ -1,8 +1,7 @@
-import type { Project, Task, User } from '@/types'
+import Mock from 'mockjs'
+import type { Project, Task, User } from '../src/types'
 
-const STORAGE_KEY = 'pm_mock_db'
-
-interface MockDatabase {
+export interface MockDatabase {
   users: User[]
   projects: Project[]
   tasks: Task[]
@@ -10,12 +9,14 @@ interface MockDatabase {
   nextTaskId: number
 }
 
+export const VALID_PASSWORD = '123456'
+
 const initialUsers: User[] = [
   {
     id: 1,
     username: 'admin',
     name: '管理员',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=admin',
+    avatar: Mock.Random.image('100x100', Mock.Random.color(), '#fff', 'Admin'),
     role: '项目经理',
     email: 'admin@example.com',
   },
@@ -23,7 +24,7 @@ const initialUsers: User[] = [
     id: 2,
     username: 'zhangsan',
     name: '张三',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhangsan',
+    avatar: Mock.Random.image('100x100', Mock.Random.color(), '#fff', 'ZS'),
     role: '前端开发',
     email: 'zhangsan@example.com',
   },
@@ -31,7 +32,7 @@ const initialUsers: User[] = [
     id: 3,
     username: 'lisi',
     name: '李四',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=lisi',
+    avatar: Mock.Random.image('100x100', Mock.Random.color(), '#fff', 'LS'),
     role: '后端开发',
     email: 'lisi@example.com',
   },
@@ -39,7 +40,7 @@ const initialUsers: User[] = [
     id: 4,
     username: 'wangwu',
     name: '王五',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=wangwu',
+    avatar: Mock.Random.image('100x100', Mock.Random.color(), '#fff', 'WW'),
     role: 'UI 设计师',
     email: 'wangwu@example.com',
   },
@@ -47,7 +48,7 @@ const initialUsers: User[] = [
     id: 5,
     username: 'zhaoliu',
     name: '赵六',
-    avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=zhaoliu',
+    avatar: Mock.Random.image('100x100', Mock.Random.color(), '#fff', 'ZL'),
     role: '测试工程师',
     email: 'zhaoliu@example.com',
   },
@@ -184,47 +185,49 @@ const initialTasks: Task[] = [
   },
 ]
 
-function getDefaultDb(): MockDatabase {
+function createDefaultDb(): MockDatabase {
   return {
-    users: initialUsers,
-    projects: initialProjects,
-    tasks: initialTasks,
+    users: structuredClone(initialUsers),
+    projects: structuredClone(initialProjects),
+    tasks: structuredClone(initialTasks),
     nextProjectId: 5,
     nextTaskId: 8,
   }
 }
 
-function loadDb(): MockDatabase {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) {
-    const db = getDefaultDb()
-    saveDb(db)
-    return db
-  }
-  return JSON.parse(raw) as MockDatabase
-}
-
-function saveDb(db: MockDatabase) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(db))
-}
-
-export function delay(ms = 300) {
-  return new Promise((resolve) => setTimeout(resolve, ms))
-}
+let db: MockDatabase = createDefaultDb()
 
 export const mockDb = {
   get(): MockDatabase {
-    return loadDb()
+    return db
   },
 
-  save(db: MockDatabase) {
-    saveDb(db)
+  save(next: MockDatabase) {
+    db = next
   },
 
   reset() {
-    localStorage.removeItem(STORAGE_KEY)
-    return getDefaultDb()
+    db = createDefaultDb()
+    return db
   },
 }
 
-export const VALID_PASSWORD = '123456'
+export function generateMockProject(overrides: Partial<Project> = {}): Project {
+  const data = Mock.mock({
+    'name': '@ctitle(4, 10)项目',
+    'description': '@cparagraph(1, 2)',
+    'status|1': ['planning', 'active', 'completed', 'archived'],
+    'progress|0-100': 1,
+    'ownerId|1-5': 1,
+    'startDate': '@date("yyyy-MM-dd")',
+    'endDate': '@date("yyyy-MM-dd")',
+  }) as Omit<Project, 'id' | 'memberIds' | 'createdAt'>
+
+  return {
+    id: mockDb.get().nextProjectId,
+    memberIds: [1],
+    createdAt: new Date().toISOString(),
+    ...data,
+    ...overrides,
+  }
+}

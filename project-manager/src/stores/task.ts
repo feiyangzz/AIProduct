@@ -10,31 +10,27 @@ export const useTaskStore = defineStore('task', () => {
   async function fetchTasks(projectId?: number) {
     loading.value = true
     try {
-      const res = await taskApi.getList(projectId)
-      if (res.code === 0) tasks.value = res.data
+      tasks.value = await taskApi.getList(projectId)
     } finally {
       loading.value = false
     }
   }
 
   async function createTask(form: TaskForm) {
-    const res = await taskApi.create(form)
-    if (res.code !== 0) throw new Error(res.message)
-    tasks.value.unshift(res.data)
-    return res.data
+    const task = await taskApi.create(form)
+    tasks.value.unshift(task)
+    return task
   }
 
   async function updateTask(id: number, form: Partial<TaskForm>) {
-    const res = await taskApi.update(id, form)
-    if (res.code !== 0) throw new Error(res.message)
+    const task = await taskApi.update(id, form)
     const index = tasks.value.findIndex((t) => t.id === id)
-    if (index !== -1) tasks.value[index] = res.data
-    return res.data
+    if (index !== -1) tasks.value[index] = task
+    return task
   }
 
   async function deleteTask(id: number) {
-    const res = await taskApi.delete(id)
-    if (res.code !== 0) throw new Error(res.message)
+    await taskApi.delete(id)
     tasks.value = tasks.value.filter((t) => t.id !== id)
   }
 

@@ -122,12 +122,12 @@ const taskStatusStats = computed(() => {
 onMounted(async () => {
   loading.value = true
   try {
-    const [statsRes] = await Promise.all([
+    const [statsData] = await Promise.all([
       dashboardApi.getStats(),
       projectStore.fetchProjects(),
       taskStore.fetchTasks(),
     ])
-    if (statsRes.code === 0) stats.value = statsRes.data
+    stats.value = statsData
   } finally {
     loading.value = false
   }

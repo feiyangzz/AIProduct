@@ -15,17 +15,20 @@ export const useUserStore = defineStore('user', () => {
   }
 
   async function login(username: string, password: string) {
-    const res = await authApi.login({ username, password })
-    if (res.code !== 0) throw new Error(res.message)
-    user.value = res.data.user
-    token.value = res.data.token
-    return res.data
+    const data = await authApi.login({ username, password })
+    user.value = data.user
+    token.value = data.token
+    localStorage.setItem('pm_token', data.token)
+    localStorage.setItem('pm_user', JSON.stringify(data.user))
+    return data
   }
 
   async function logout() {
     await authApi.logout()
     user.value = null
     token.value = ''
+    localStorage.removeItem('pm_token')
+    localStorage.removeItem('pm_user')
   }
 
   const isLoggedIn = () => !!token.value

@@ -215,8 +215,7 @@ async function handleDelete(id: number) {
 
 onMounted(async () => {
   await projectStore.fetchProjects()
-  const res = await teamApi.getMembers()
-  if (res.code === 0) members.value = res.data
+  members.value = await teamApi.getMembers()
 })
 </script>
 
